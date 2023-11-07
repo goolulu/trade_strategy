@@ -17,13 +17,21 @@ class StockTick:
     def fetch_stock_tick(self, symbol):
         stock_zh_a_tick_tx_js_df = ak.stock_zh_a_tick_tx_js(symbol=symbol).rename(columns=self.dict_map)
         ak.stock_zh_a_tick_tx()
-        stock_zh_a_tick_tx_js_df['symbol'] = symbol
+        stock_zh_a_tick_tx_js_df['symbol'] = symbol[2:]
         stock_zh_a_tick_tx_js_df['trade_date'] = datetime.datetime.now().strftime('%Y%m%d')
+        stock_zh_a_tick_tx_js_df['order_type'] = stock_zh_a_tick_tx_js_df['order_type'].apply(convert_order_type)
 
+        print('jjjj')
         self.datasource.insert_many(stock_zh_a_tick_tx_js_df.to_dict(orient="records"),
                                     'history', 'hs_stock_tick')
 
-
+def convert_order_type(type) -> str:
+    if type == '买盘':
+        return 'buy'
+    elif type =='卖盘':
+        return 'sell'
+    else:
+        return 'mid'
 
 if __name__ == '__main__':
     StockTick().fetch_stock_tick("sh601318")

@@ -36,7 +36,7 @@ class StockQuotation:
         stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=symbol, period=period, start_date=start_date,
                                                 end_date=end_date, adjust=adjust).rename(columns=self.map)
         stock_zh_a_hist_df['symbol'] = symbol
-        stock_zh_a_hist_df['trade_date'] = stock_zh_a_hist_df['trade_date'].astype(str)
+        stock_zh_a_hist_df['trade_date'] = stock_zh_a_hist_df['trade_date'].apply(convert_date)
         self.datasource.insert_many(stock_zh_a_hist_df.to_dict(orient='records'), 'history', 'hs_stock_quotation')
 
 
