@@ -3,6 +3,7 @@ import datetime
 import akshare as ak
 
 from data_source import DataSource
+from pandas import DataFrame
 
 
 class StockTick:
@@ -14,24 +15,39 @@ class StockTick:
         self.dict_map = dict(zip(self.column, self.convert_column))
         self.datasource = DataSource()
 
-    def fetch_stock_tick(self, symbol):
-        stock_zh_a_tick_tx_js_df = ak.stock_zh_a_tick_tx_js(symbol=symbol).rename(columns=self.dict_map)
-        ak.stock_zh_a_tick_tx()
-        stock_zh_a_tick_tx_js_df['symbol'] = symbol[2:]
-        stock_zh_a_tick_tx_js_df['trade_date'] = datetime.datetime.now().strftime('%Y%m%d')
-        stock_zh_a_tick_tx_js_df['order_type'] = stock_zh_a_tick_tx_js_df['order_type'].apply(convert_order_type)
+    def fetch_stock_tick(self, symbol: str, trade_date: str = None):
 
-        print('jjjj')
-        self.datasource.insert_many(stock_zh_a_tick_tx_js_df.to_dict(orient="records"),
+        reuslt: DataFrame
+
+        if trade_date is None:
+            stock_zh_a_tick_tx_js_df = ak.stock_zh_a_tick_tx_js(symbol=symbol).rename(columns=self.dict_map)
+            stock_zh_a_tick_tx_js_df['symbol'] = symbol[2:]
+            stock_zh_a_tick_tx_js_df['trade_date'] = datetime.datetime.now().strftime('%Y%m%d')
+            stock_zh_a_tick_tx_js_df['order_type'] = stock_zh_a_tick_tx_js_df['order_type'].apply(convert_order_type)
+            reuslt = stock_zh_a_tick_tx_js_df
+        else:
+            stock_zh_a_tick_tx_df = ak.stock_zh_a_tick_tx(symbol=symbol, trade_date=trade_date).rename(
+                columns=self.dict_map)
+            if stock_zh_a_tick_tx_df.values.size == 0:
+                print("交易日%s 暂时无数据" % trade_date)
+                return
+            stock_zh_a_tick_tx_df['symbol'] = symbol[2:]
+            stock_zh_a_tick_tx_df['trade_date'] = datetime.datetime.now().strftime('%Y%m%d')
+            stock_zh_a_tick_tx_df['order_type'] = stock_zh_a_tick_tx_df['order_type'].apply(convert_order_type)
+            reuslt = stock_zh_a_tick_tx_df
+
+        self.datasource.insert_many(reuslt.to_dict(orient="records"),
                                     'history', 'hs_stock_tick')
+
 
 def convert_order_type(type) -> str:
     if type == '买盘':
         return 'buy'
-    elif type =='卖盘':
+    elif type == '卖盘':
         return 'sell'
     else:
         return 'mid'
+
 
 if __name__ == '__main__':
     StockTick().fetch_stock_tick("sh601318")

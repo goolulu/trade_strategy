@@ -41,6 +41,7 @@ class StockQuotation:
 
 
 
+
 if __name__ == '__main__':
     sq = StockQuotation()
     sq.fetch_hs_stock_quotation('601318')
