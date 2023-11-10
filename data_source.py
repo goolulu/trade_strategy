@@ -1,6 +1,7 @@
 import json
 
 import pymongo
+import pandas as pd
 from pandas import DataFrame
 
 
@@ -27,7 +28,15 @@ class DataSource:
         table = db[table]
 
         table.insert_many(doc)
-        table.update_many()
+
+    def select_list(self, db: str, table: str, *args, **kwargs) -> DataFrame:
+        db = self.client[db]
+        table = db[table]
+        cursor = table.find(args, kwargs)
+        result = []
+        for data in cursor:
+            result.append(data)
+        return pd.DataFrame(result)
 
 
 if __name__ == '__main__':

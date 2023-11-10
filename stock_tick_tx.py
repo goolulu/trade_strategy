@@ -1,6 +1,7 @@
 import datetime
 
 import akshare as ak
+import pandas as pd
 
 from data_source import DataSource
 from pandas import DataFrame
@@ -14,6 +15,9 @@ class StockTick:
 
         self.dict_map = dict(zip(self.column, self.convert_column))
         self.datasource = DataSource()
+
+        self.db = 'history'
+        self.table = 'hs_stock_tick'
 
     def fetch_stock_tick(self, symbol: str, trade_date: str = None):
 
@@ -39,7 +43,11 @@ class StockTick:
             reuslt = stock_zh_a_tick_tx_df
 
         self.datasource.insert_many(reuslt.to_dict(orient="records"),
-                                    'history', 'hs_stock_tick')
+                                    self.db, self.table)
+
+    def select_list(self, symbol=None) -> DataFrame:
+        return self.datasource.select_list(self.db,self.table)
+
 
 
 def convert_order_type(type) -> str:
@@ -52,4 +60,12 @@ def convert_order_type(type) -> str:
 
 
 if __name__ == '__main__':
-    StockTick().fetch_stock_tick("sh601318")
+   data = StockTick().select_list()
+   a = 0
+   b = 0
+   c = 0
+
+   a = data['trade_date']
+   b = data['biz_time']
+   c = a+b
+   print(c)
