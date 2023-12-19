@@ -1,6 +1,7 @@
 import datetime
 
 import akshare as ak
+import numpy as np
 import pandas as pd
 
 from data_source import DataSource
@@ -46,8 +47,7 @@ class StockTick:
                                     self.db, self.table)
 
     def select_list(self, symbol=None) -> DataFrame:
-        return self.datasource.select_list(self.db,self.table)
-
+        return self.datasource.select_list(self.db, self.table)
 
 
 def convert_order_type(type) -> str:
@@ -61,11 +61,3 @@ def convert_order_type(type) -> str:
 
 if __name__ == '__main__':
    data = StockTick().select_list()
-   a = 0
-   b = 0
-   c = 0
-
-   a = data['trade_date']
-   b = data['biz_time']
-   c = a+b
-   print(c)
