@@ -3,6 +3,8 @@ import datetime
 import akshare as ak
 from typing import Any, Type, Dict, List, Optional
 
+from pandas import DataFrame
+
 from data_source import DataSource
 
 
@@ -39,9 +41,10 @@ class StockQuotation:
         stock_zh_a_hist_df['trade_date'] = stock_zh_a_hist_df['trade_date'].apply(convert_date)
         self.datasource.insert_many(stock_zh_a_hist_df.to_dict(orient='records'), 'history', 'hs_stock_quotation')
 
-
+    def select_list(self, where: str) -> DataFrame:
+        return self.datasource.select_list(self.db, self.table)
 
 
 if __name__ == '__main__':
     sq = StockQuotation()
-    sq.fetch_hs_stock_quotation('601318')
+    sq.fetch_hs_stock_quotation('601318', start_date='20231111', end_date= datetime.datetime.now().strftime('%Y%m%d'))

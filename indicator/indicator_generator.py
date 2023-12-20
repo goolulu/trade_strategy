@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import statistics as stats
@@ -15,17 +17,22 @@ class IndicatorGenerator:
             if (len(history) > N):
                 del (history[0])
             sma_values.append(stats.mean(history))
-        sma = pd.Series(sma_values, index=data['trade_date'])
-        price = pd.Series(data=data['close'].values, index=data['trade_date'])
+
         figure = plt.figure()
-        ax1 = figure.add_subplot()
-        price.plot()
-        plt.show()
+        ax = figure.subplots()
+        date = data['trade_date'].apply(lambda x: datetime.datetime.strptime(x,'%Y%m%d'))
+        ax.plot(date.values, sma_values, label='sma')
+        ax.plot(date.values, data['close'].values, label='close')
+        ax.set_xlabel("time [day]")
+        ax.set_ylabel("price")
+        ax.legend()
+        ax.plot()
+        figure.show()
 
     def RSI(self):
         pass
 
 
 if __name__ == '__main__':
-    data = DataSource().select_list('history','hs_stock_quotation')
-    IndicatorGenerator().SMA(data,5)
+    data = DataSource().select_list('history', 'hs_stock_quotation')
+    IndicatorGenerator().SMA(data, 5)
