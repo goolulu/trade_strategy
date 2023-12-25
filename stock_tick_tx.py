@@ -49,7 +49,6 @@ class StockTick:
         return self.datasource.select_list(self.db, self.table)
 
 
-
 def convert_order_type(type) -> str:
     if type == '买盘':
         return 'buy'
@@ -61,5 +60,15 @@ def convert_order_type(type) -> str:
 
 if __name__ == '__main__':
     # StockTick().fetch_stock_tick("sh601318")
-    data_frame = StockTick().select_list()
+    # 小于20w 散户, 20w到100w牛户，100w以上机构
+    smail_power = 200000
+    middle_power = 1000000
 
+    tick_list = StockTick().select_list()
+    sell_orders = tick_list[tick_list['order_type'] == 'sell']
+    buy_orders = tick_list[tick_list['order_type'] == 'buy']
+    retail_investor_buy = buy_orders[buy_orders['turnover'] < smail_power]
+    retail_investor_sell = sell_orders[sell_orders['turnover'] < smail_power]
+
+    retail_investor_sell = sell_orders[
+        (buy_orders['turnover'] >= smail_power) and (buy_orders['turnover'] < middle_power)]
